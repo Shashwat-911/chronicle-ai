@@ -11,14 +11,18 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.45+-FF4B4B.svg)](https://streamlit.io/)
 [![Google GenAI](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4.svg)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Demo](https://img.shields.io/badge/Interactive-Visual%20Novel-c9a84c.svg)]()
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-chronicle--ai.streamlit.app-c9a84c?style=for-the-badge)](https://chronicle-ai.streamlit.app/)
 
 > **"Speak. The DM listens. Your choices have consequences."**
+
+🎮 **Live Web Application:** [https://chronicle-ai.streamlit.app/](https://chronicle-ai.streamlit.app/)
 
 **ChronicleAI** is a portfolio-grade, voice-driven interactive dark fantasy RPG and visual novel engine. Built with Streamlit, the modern `google-genai` SDK, and Gemini 2.5 Flash, it turns your spoken and typed words into branching, consequences-driven narratives presented in an atmospheric, cinematic visual novel interface.
 
 <p align="center">
-  <img src="assets/demo.webp" alt="ChronicleAI Gameplay Demo" width="850" />
+  <a href="https://chronicle-ai.streamlit.app/">
+    <img src="assets/demo.webp" alt="ChronicleAI Gameplay Demo" width="850" />
+  </a>
 </p>
 
 ---
