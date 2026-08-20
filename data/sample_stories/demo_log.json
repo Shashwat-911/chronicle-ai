@@ -1,0 +1,82 @@
+[
+  {
+    "role": "player",
+    "content": "[STORY_BEGIN]",
+    "beat": 1
+  },
+  {
+    "role": "dm",
+    "content": "The sky-ferry deposits you at Ashveil's docking platform as thunder cracks across a bruised sky. The harbormaster — a wiry woman named Mira — glances at you once and looks away too quickly, her hands trembling as she logs your arrival on a rain-warped ledger. Behind her, the town of Ashveil clings to the floating island's edge like a barnacle afraid of the drop, its cobblestone streets slick with an oily rain that smells faintly of copper.\n\nYou notice the docking platform is nearly deserted. Three other ferries sit moored and abandoned, their rigging tangled and their cargo holds still sealed. That's unusual — Ashveil is a border town, a trading hub. It should be bustling. Instead, the only sound beyond the storm is the distant tolling of a bell that no one seems to be ringing.\n\nA hunched figure wrapped in a moth-eaten cloak shuffles toward you from the direction of the town's only inn, The Gilded Antler. He introduces himself as Old Caius, innkeeper and — as he puts it with a wink that doesn't reach his eyes — \"the only honest man left in Ashveil.\" He offers you a room, warm stew, and answers. His eyes flick nervously toward the mayor's manor on the hill, a dark silhouette against the lightning.\n\nThe bell tolls again. Caius flinches. \"Best come inside,\" he mutters. \"They don't like it when folk linger near the docks after dark. Not anymore.\"\n\n[NPC_MET: Mira the Harbormaster, nervous]\n[NPC_MET: Old Caius, friendly]\n[QUEST_STARTED: Uncover what is sealed in the vault beneath Ashveil Manor]",
+    "beat": 1
+  },
+  {
+    "role": "player",
+    "content": "I follow Old Caius to the inn but stop at the doorway to look back at Mira. I want to observe what she does when she thinks no one is watching.",
+    "beat": 2
+  },
+  {
+    "role": "dm",
+    "content": "You follow Caius toward The Gilded Antler, your boots squelching on cobblestones that seem to sweat in the unnatural heat despite the storm overhead. At the inn's threshold — a heavy oak door carved with antlers and protective runes — you pause and glance back over your shoulder, keeping to the shadows of the doorframe.\n\nMira stands alone on the platform, and now that she believes herself unobserved, the mask of bureaucratic composure falls away entirely. She pulls a small iron key from beneath her coat and unlocks a compartment under the docking ledger's stand, withdrawing a folded parchment sealed with black wax. She reads it quickly, her lips moving, and then — to your surprise — she tears the parchment into pieces and feeds them to the copper-smelling rain, letting the fragments dissolve in the oily puddles. She looks up toward the mayor's manor and makes a gesture you don't recognize: three fingers pressed to her throat, then flung outward. A ward? A signal?\n\nA lantern flickers in a high window of the manor in response. One. Two. Three blinks. Mira nods once, tucks the key away, and begins walking briskly — not toward the town, but toward the cliffside path that leads beneath the island's edge. Toward whatever is below.\n\nCaius appears at your elbow, having doubled back. \"Saw that, did you?\" he whispers, his breath smelling of pipe tobacco and fear. \"Good. You'll need those eyes if you're going to survive what's coming. Come — stew first, then I'll tell you about the vault.\"\n\n[SANITY_CHANGE: -5]\n[WORLD_FLAG: mira_observed_at_docks=true]\n[QUEST_STARTED: Investigate Mira's secret correspondence]",
+    "beat": 2
+  },
+  {
+    "role": "player",
+    "content": "I sit down with Caius and ask him directly — what happened to all the traders? Why is the town so empty?",
+    "beat": 3
+  },
+  {
+    "role": "dm",
+    "content": "The Gilded Antler's common room is a graveyard of abandoned mugs and overturned chairs. Caius leads you past a cold hearth to a corner booth where a single candle struggles against the dark. He slides a bowl of surprisingly good venison stew across the scarred table and pours two measures of something amber and potent from a dented flask.\n\n\"Three weeks ago,\" he begins, his voice barely above the storm's murmur, \"the mayor — Lord Draven — sealed the east sky-bridge. Said it was structural damage. Then the west bridge. Then the ferry schedules changed — arrivals only, no departures. Yours was the last scheduled ferry, and I'd wager my last bottle it won't be making a return trip.\" He lets that sink in, watching your face. \"The traders didn't leave, friend. They're still here. Most of them, anyway. Draven has them working below the manor — 'civic duty,' he calls it. Excavation. They're digging something out of the island's core.\"\n\nHe leans closer. \"Two nights ago, Pella — the chandler's daughter — snuck down to see where her father was working. She came back white as bone, wouldn't speak for a full day. When she finally talked, she said only one thing: 'It's breathing.' Then Draven's guards took her.\" Caius drains his cup. \"Whatever's in that vault, it isn't treasure. It isn't a weapon. It's alive, and Draven is trying to wake it up.\"\n\nThe bell tolls midnight. From somewhere beneath the floorboards, you feel a vibration — rhythmic, organic, like a heartbeat buried in stone.\n\n[SANITY_CHANGE: -10]\n[WORLD_FLAG: learned_about_vault=true]\n[WORLD_FLAG: traders_imprisoned=true]\n[NPC_MET: Lord Draven, antagonist]",
+    "beat": 3
+  },
+  {
+    "role": "player",
+    "content": "I ask Caius if there's any way to get into the manor without being detected. I want to see this vault for myself.",
+    "beat": 4
+  },
+  {
+    "role": "dm",
+    "content": "Caius stares at you for a long moment, then lets out a laugh that sounds more like a cough. \"Direct, aren't you? I like that. Also, it'll probably get you killed.\" He unfolds a grease-stained napkin and begins sketching on it with a charcoal stub — a rough map of the manor grounds.\n\n\"Front gate's out — Draven has four guards there at all times, plus that blasted hound of his. Thing's half-wolf, half-something-else. But there's a servants' passage.\" His charcoal traces a line from the inn's cellar through what appears to be an old drainage tunnel. \"This inn was the manor's guesthouse a hundred years ago, before the family built upward. The old servant tunnels still connect, if they haven't collapsed. I've kept my cellar entrance boarded up for years, but the boards come off easy enough.\"\n\nHe marks an X deep within the manor's foundations. \"The vault entrance is in the wine cellar, behind a false wall. I know because I helped Lord Draven's father build it forty years ago — back when it was meant to keep something IN, not to dig it OUT.\" He slides the makeshift map toward you. \"Take this. But I'm not going with you. I'm too old, and that thing below... I felt it once, years ago. Through the walls. Whatever it is, it knows when you're afraid.\"\n\nHe pauses, then reaches under the table and produces a battered iron lantern with blue-tinted glass. \"Take this too. The blue light — it was the old lord's design. He said the thing in the vault recoils from it. Can't promise it still works, but it's better than darkness.\"\n\n[ITEM_GAINED: Charcoal Map of Manor]\n[ITEM_GAINED: Blue-Glass Lantern]\n[WORLD_FLAG: servant_tunnel_known=true]",
+    "beat": 4
+  },
+  {
+    "role": "player",
+    "content": "I thank Caius, light the blue lantern, and descend into the cellar to find the tunnel entrance.",
+    "beat": 5
+  },
+  {
+    "role": "dm",
+    "content": "You descend the creaking stairs into the Gilded Antler's cellar, the blue-glass lantern casting an eerie cobalt glow across walls lined with dusty wine racks and forgotten casks. The air changes immediately — warmer, thicker, carrying that same copper scent from the rain outside but concentrated now, almost metallic on your tongue. The lantern's blue flame burns steady, undisturbed by drafts, which is strange because you can feel air moving past you, drawn inward as if the tunnel ahead is inhaling.\n\nThe boarded section is obvious — newer wood nailed over an archway of much older stone, carved with runes that match the ones on the inn's front door but inverted. You pry the boards free with effort, each nail protesting with a shriek that sounds too loud in the silence. Behind them, a tunnel stretches into absolute darkness, its walls slick with something iridescent that shifts between black and deep violet under your lantern light. The passage is narrow — wide enough for one person — and the floor slopes steadily downward.\n\nTwenty paces in, you notice the walls are no longer stone. They're bone. Massive, calcified bones fused with the island's rock, as if the floating island itself was once alive — or was built around something that was. The heartbeat vibration you felt upstairs is stronger here, pulsing through the bone-walls in slow, deliberate rhythm. Your lantern flickers but holds. The blue light pushes back shadows that seem reluctant to retreat.\n\nThen you hear it: footsteps ahead. Not coming toward you — walking perpendicular, crossing an intersection you can't yet see. Heavy boots. The clink of keys. A guard on patrol, deep in the manor's guts.\n\n[HEALTH_CHANGE: -5]\n[SANITY_CHANGE: -15]\n[WORLD_FLAG: entered_servant_tunnel=true]\n[WORLD_FLAG: island_is_organic=true]",
+    "beat": 5
+  },
+  {
+    "role": "player",
+    "content": "I press myself against the bone wall and extinguish the lantern. I wait for the guard to pass, then follow them silently.",
+    "beat": 6
+  },
+  {
+    "role": "dm",
+    "content": "You snuff the lantern's flame between thumb and forefinger, the blue light dying with a soft hiss that sounds almost like a sigh. Darkness swallows you completely — but not silence. The guard's footsteps echo through the bone corridors with metronomic regularity, and beneath them, that relentless heartbeat continues its slow cadence. You press your back against the wall and feel the bone thrum against your spine, warm and faintly pulsing like a sleeping vein.\n\nThe guard passes the intersection ahead — a woman, you realize, catching the briefest silhouette against a distant torch. She's not one of the manor guards. She's wearing Mira's harbormaster coat. Of course. Whatever Mira's role in this conspiracy, it extends well beyond the docks. She moves with purpose, keys jingling at her belt, and disappears down the left passage. You count to thirty, then follow, keeping your footsteps in time with the heartbeat to mask any sound.\n\nThe passage opens into a wider chamber — an antechamber of sorts, with three corridors branching off. The one Mira took is marked with a fresh chalk symbol on the wall: an eye with three pupils. The center corridor has been collapsed deliberately, rubble still fresh. The right corridor glows faintly with an amber light and carries the sound of voices — multiple voices, chanting in a language you don't recognize but that makes your teeth ache.\n\nA scrap of parchment lies on the floor near the collapsed center passage, dropped or discarded. You pick it up: a partial manifest listing names — the missing traders — next to dates and the word \"OFFERED.\" The most recent date is tomorrow.\n\n[SANITY_CHANGE: -10]\n[ITEM_GAINED: Partial Manifest]\n[WORLD_FLAG: mira_is_conspirator=true]\n[WORLD_FLAG: traders_being_sacrificed=true]\n[QUEST_STARTED: Stop tomorrow's offering]",
+    "beat": 6
+  },
+  {
+    "role": "player",
+    "content": "I take the right corridor toward the chanting. I need to see what they're doing to the traders.",
+    "beat": 7
+  },
+  {
+    "role": "dm",
+    "content": "Every instinct screams at you to turn back, but you press forward through the right corridor, drawn by the chanting that grows louder with each step. The bone walls give way to something else here — a smooth, dark material that isn't stone or metal but seems to absorb your touch when you brush against it, your fingertips tingling with cold. The amber light intensifies until you reach a natural balcony overlooking a vast underground chamber.\n\nWhat you see below defies easy comprehension. The chamber is enormous — cathedral-vast — and at its center sits the vault door that Caius described. But it's not a door anymore. It's been pried open like a ribcage, iron and stone bent outward, and from within spills a light that is neither amber nor gold but something your eyes refuse to properly process. Around the vault's maw, thirty or more figures stand in concentric circles — you recognize townsfolk, traders, guards — all chanting with eyes that glow faintly with that same impossible light. Lord Draven stands at the innermost ring, his arms raised, his voice the loudest.\n\nBetween the chanters, you count seven figures who are not standing by choice. They're bound to pillars of fused bone, their mouths gagged, their eyes wild with terror — the remaining missing traders. The manifest's meaning is sickeningly clear. And within the vault, something shifts. Something massive, coiled, and ancient adjusts its position like a sleeper turning in dreams. A single eye — easily the size of a wagon wheel — opens lazily in the darkness beyond the broken door, its pupil a vertical slit of burning violet.\n\nIt sees you. Across the vast chamber, past the chanters and the bound sacrifices, that immense eye fixes on your position on the balcony. The chanting falters. Draven turns. Mira, standing at his side, points upward at you and screams a single word: \"INTRUDER!\"\n\n[HEALTH_CHANGE: -10]\n[SANITY_CHANGE: -25]\n[WORLD_FLAG: vault_creature_seen=true]\n[WORLD_FLAG: cover_blown=true]\n[NPC_MET: Lord Draven, hostile]",
+    "beat": 7
+  },
+  {
+    "role": "player",
+    "content": "I raise the blue-glass lantern and ignite it, holding it toward the creature's eye. Caius said it recoils from the blue light!",
+    "beat": 8
+  },
+  {
+    "role": "dm",
+    "content": "Your hands tremble as you fumble with the lantern's mechanism, the ancient flint scraping once, twice — and on the third strike, the blue flame erupts to life with a fury you didn't expect. The cobalt fire blazes like a fallen star in your grip, brighter than it ever burned in the cellar, as if the lantern has been waiting decades for this exact moment. You thrust it toward the vault.\n\nThe effect is immediate and devastating. The creature's enormous eye contracts, its violet pupil narrowing to a hairline slit, and a sound tears through the chamber — not a roar but a frequency, a vibration that rattles your bones and cracks the balcony's edge beneath your feet. The chanters collapse like marionettes with cut strings, their borrowed light extinguishing as they crumple. Lord Draven staggers, blood streaming from his nose, his carefully maintained composure shattered. \"No!\" he screams, his voice raw. \"It's not ready! The binding isn't complete!\"\n\nThe creature writhes within its vault, and you understand with terrible clarity what Caius's old lord knew: the blue lantern doesn't just repel the creature — it disrupts whatever tether Draven has been building between it and its would-be servants. The bound traders are screaming through their gags, but the bone pillars holding them are cracking. The chamber itself groans, the island's very foundation protesting as the thing in the vault thrashes. Chunks of the ceiling begin to fall.\n\nMira races toward a side passage, abandoning Draven without a backward glance. The lord himself stands frozen, staring at the creature with an expression that has shifted from command to pure, abject terror — the face of a man who just realized he was never the master in this arrangement. The ground tilts beneath you. The balcony won't hold much longer. Below, the traders strain against their bonds, the chanters lie unconscious, and the creature's eye — still fixed on your lantern — begins to close. Not in retreat. In concentration.\n\n[HEALTH_CHANGE: -5]\n[SANITY_CHANGE: -15]\n[WORLD_FLAG: ritual_disrupted=true]\n[WORLD_FLAG: creature_awakening=true]\n[ITEM_LOST: Blue-Glass Lantern]\n[CHAPTER_END]",
+    "beat": 8
+  }
+]
