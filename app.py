@@ -2,7 +2,8 @@
 app.py — Main entry point for ChronicleAI: Interactive Visual Novel Engine.
 
 A voice-driven, text-based RPG featuring dynamic Gemini-powered DM responses,
-live audio transcription, state management, and visual novel aesthetics.
+live audio transcription, state management, Pandas telemetry pipelines,
+interactive st.data_editor codex, dynamic KPI metric deltas, and visual novel aesthetics.
 """
 
 from __future__ import annotations
@@ -51,6 +52,8 @@ from core.story_engine import (
     apply_dm_response,
     compute_story_stats,
     export_story_as_text,
+    export_telemetry_csv,
+    get_turn_history_df,
 )
 from core.gemini_client import (
     check_api_connection,
@@ -71,6 +74,11 @@ from ui.components import (
     render_game_over,
     render_character_panel,
     render_api_status,
+    render_kpi_dashboard,
+    render_interactive_inventory_editor,
+    render_telemetry_analytics,
+    render_world_map_cartography,
+    render_npc_ledger,
 )
 from data.story_templates import STORY_TEMPLATES, get_template_choices
 
@@ -122,7 +130,7 @@ def load_demo_session() -> None:
 # ═════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown('<div class="chronicle-title-compact">⚔ CHRONICLE AI</div>', unsafe_allow_html=True)
-    st.caption("Interactive Visual Novel Engine")
+    st.caption("Interactive Visual Novel & AI RPG Engine")
     
     api_connected = check_api_connection()
     render_api_status(api_connected)
@@ -136,25 +144,51 @@ with st.sidebar:
         st.markdown(f"**Hero:** {state.protagonist_name} ({state.protagonist_class})")
         st.divider()
 
-        # Story Stats Expander
-        with st.expander("📖 Story Statistics", expanded=True):
+        # Story Stats Expander with dynamic KPI deltas
+        with st.expander("📊 Story Telemetry & Vitals", expanded=True):
             stats = compute_story_stats(state)
             c1, c2 = st.columns(2)
             with c1:
-                st.metric("Turns", stats["total_turns"])
-                st.metric("Quests", stats["quests_ratio"])
+                st.metric(
+                    "Turn Progress",
+                    f"Turn {stats['total_turns']}",
+                    delta="+1 Turn" if stats["total_turns"] > 0 else "Start",
+                )
+                st.metric(
+                    "Vitality",
+                    f"{state.health}/100",
+                    delta=f"{stats['last_health_delta']:+d} HP" if stats['last_health_delta'] != 0 else None,
+                )
             with c2:
-                st.metric("NPCs Met", stats["unique_npcs_met"])
-                st.metric("Danger", stats["danger_label"])
-            st.caption(f"Chapter: {stats['chapter']} | Inventory: {stats['inventory_count']} items")
+                st.metric(
+                    "Quests Done",
+                    stats["quests_ratio"],
+                    delta=f"{len(state.completed_quests)} Done" if len(state.completed_quests) > 0 else None,
+                )
+                st.metric(
+                    "Sanity",
+                    f"{state.sanity}/100",
+                    delta=f"{stats['last_sanity_delta']:+d} Mind" if stats['last_sanity_delta'] != 0 else None,
+                )
+            st.caption(f"Chapter: {stats['chapter']} | Threat: **{stats['danger_label']}**")
 
-        # Export Story
+        # Export Options
+        st.markdown("##### 💾 Export Records")
         story_text = export_story_as_text(state)
         st.download_button(
-            label="💾 Export Chronicle (.txt)",
+            label="📜 Export Chronicle (.txt)",
             data=story_text,
             file_name=f"chronicle_{state.protagonist_name}_{state.session_id[:6]}.txt",
             mime="text/plain",
+            use_container_width=True,
+        )
+
+        telemetry_csv = export_telemetry_csv(state)
+        st.download_button(
+            label="📊 Export Telemetry Dataset (.csv)",
+            data=telemetry_csv,
+            file_name=f"telemetry_{state.protagonist_name}_{state.session_id[:6]}.csv",
+            mime="text/csv",
             use_container_width=True,
         )
 
@@ -278,13 +312,14 @@ if st.session_state.game_phase == "setup":
 # ═════════════════════════════════════════════════════════════════════
 elif st.session_state.game_phase == "playing":
     state = st.session_state.story_state
+    stats = compute_story_stats(state)
 
     # Check for game over triggers
     if state.health <= 0 or state.sanity <= 0:
         st.session_state.game_phase = "game_over"
         st.rerun()
 
-    # 3-Column Layout: [Left Sidebar Info, Center Story & Input, Right History]
+    # 3-Column Layout: [Left Character Sheet, Center Main Story & Dashboards, Right History]
     col_char, col_main, col_hist = st.columns([1.1, 2.8, 1.1])
 
     # ── Left Column: Character Sheet ──
@@ -296,78 +331,110 @@ elif st.session_state.game_phase == "playing":
         st.write("")
         render_quest_log(state.active_quests, state.completed_quests)
 
-    # ── Center Column: Main Story & Action Input ──
+    # ── Center Column: Main Story & Interactive Dashboards ──
     with col_main:
         render_header(compact=True)
 
-        # Chapter and Beat counter
-        st.markdown(
-            f'<div class="turn-counter">Chapter {state.chapter} • Turn {state.story_beat - 1}</div>',
-            unsafe_allow_html=True,
-        )
+        # Dynamic KPI Metric Cards with Deltas
+        render_kpi_dashboard(stats, state.health, state.sanity)
+        st.write("")
 
-        # Latest story response
-        render_story_panel(state.last_dm_response or state.current_scene, is_new=True)
+        # Visual Novel & Data Tabs
+        tab_story, tab_codex, tab_telemetry, tab_world = st.tabs([
+            "⚔ Interactive Narrative",
+            "🎒 Editable Codex (data_editor)",
+            "📈 Telemetry & Vitals (Pandas)",
+            "🗺️ Cartography & NPCs (st.map)",
+        ])
 
-        # ── INPUT SECTION ──
-        st.markdown("##### ⚔ Your Action")
+        # ── TAB 1: STORY & ACTION INPUT ──
+        with tab_story:
+            # Chapter and Beat counter
+            st.markdown(
+                f'<div class="turn-counter">Chapter {state.chapter} • Turn {state.story_beat - 1}</div>',
+                unsafe_allow_html=True,
+            )
 
-        # Audio transcription handler outside form to prevent rerun wipe
-        audio_data = st.audio_input("🎤 Record Voice Action", key="voice_mic")
-        if audio_data is not None:
-            raw_bytes = process_streamlit_audio(audio_data)
-            if raw_bytes and validate_audio(raw_bytes):
-                audio_id = hash(raw_bytes)
-                if audio_id != st.session_state.get("audio_processed_id"):
-                    st.session_state.audio_processed_id = audio_id
-                    with st.spinner("Transcribing your voice..."):
-                        transcript = transcribe_audio(raw_bytes)
-                        if transcript:
-                            st.session_state.last_transcription = transcript
-                            st.success(f"Transcribed: *\"{transcript}\"*")
-                        else:
-                            st.warning("Could not clearly transcribe audio. Please try again or type below.")
+            # Latest story response
+            render_story_panel(state.last_dm_response or state.current_scene, is_new=True)
 
-        with st.form("action_form", clear_on_submit=True):
-            tab_text, tab_voice = st.tabs(["⌨️ Type Action", "🎤 Use Voice Transcription"])
+            # ── INPUT SECTION ──
+            st.markdown("##### ⚔ Your Action")
 
-            with tab_text:
-                typed_action = st.text_area(
-                    "What do you do?",
-                    placeholder="I draw my sword and demand answers from the harbormaster...",
-                    max_chars=200,
-                    label_visibility="collapsed",
-                    key="typed_action_input",
-                )
+            # Audio transcription handler outside form to prevent rerun wipe
+            audio_data = st.audio_input("🎤 Record Voice Action", key="voice_mic")
+            if audio_data is not None:
+                raw_bytes = process_streamlit_audio(audio_data)
+                if raw_bytes and validate_audio(raw_bytes):
+                    audio_id = hash(raw_bytes)
+                    if audio_id != st.session_state.get("audio_processed_id"):
+                        st.session_state.audio_processed_id = audio_id
+                        with st.spinner("Transcribing your voice..."):
+                            transcript = transcribe_audio(raw_bytes)
+                            if transcript:
+                                st.session_state.last_transcription = transcript
+                                st.success(f"Transcribed: *\"{transcript}\"*")
+                            else:
+                                st.warning("Could not clearly transcribe audio. Please try again or type below.")
 
-            with tab_voice:
-                if st.session_state.last_transcription:
-                    st.info(f"🎙 **Ready to commit:** *\"{st.session_state.last_transcription}\"*")
+            with st.form("action_form", clear_on_submit=True):
+                tab_text, tab_voice = st.tabs(["⌨️ Type Action", "🎤 Use Voice Transcription"])
+
+                with tab_text:
+                    typed_action = st.text_area(
+                        "What do you do?",
+                        placeholder="I draw my sword and demand answers from the harbormaster...",
+                        max_chars=200,
+                        label_visibility="collapsed",
+                        key="typed_action_input",
+                    )
+
+                with tab_voice:
+                    if st.session_state.last_transcription:
+                        st.info(f"🎙 **Ready to commit:** *\"{st.session_state.last_transcription}\"*")
+                    else:
+                        st.caption("Record audio using the mic widget above, then submit here.")
+                    use_voice = st.checkbox("Submit recorded voice action", value=bool(st.session_state.last_transcription))
+
+                commit_button = st.form_submit_button("⚔ Commit Action", use_container_width=True, type="primary")
+
+            if commit_button:
+                chosen_action = ""
+                if use_voice and st.session_state.last_transcription:
+                    chosen_action = st.session_state.last_transcription
+                    st.session_state.last_transcription = ""  # Clear after use
+                elif typed_action.strip():
+                    chosen_action = typed_action.strip()
+
+                if not chosen_action:
+                    st.warning("Please type an action or record your voice before committing.")
                 else:
-                    st.caption("Record audio using the mic widget above, then submit here.")
-                use_voice = st.checkbox("Submit recorded voice action", value=bool(st.session_state.last_transcription))
+                    with st.spinner("The Dungeon Master deliberates..."):
+                        dm_reply = generate_dm_response(state, chosen_action)
+                        apply_dm_response(state, dm_reply, chosen_action)
 
-            commit_button = st.form_submit_button("⚔ Commit Action", use_container_width=True, type="primary")
+                        # Check for game over or chapter transition
+                        if state.health <= 0 or state.sanity <= 0 or state.story_beat >= 50:
+                            st.session_state.game_phase = "game_over"
+                        st.rerun()
 
-        if commit_button:
-            chosen_action = ""
-            if use_voice and st.session_state.last_transcription:
-                chosen_action = st.session_state.last_transcription
-                st.session_state.last_transcription = ""  # Clear after use
-            elif typed_action.strip():
-                chosen_action = typed_action.strip()
+        # ── TAB 2: EDITABLE CODEX (st.data_editor) ──
+        with tab_codex:
+            st.markdown("##### 🎒 Interactive Inventory Codex & Equipment Ledger")
+            render_interactive_inventory_editor(state)
 
-            if not chosen_action:
-                st.warning("Please type an action or record your voice before committing.")
-            else:
-                with st.spinner("The Dungeon Master deliberates..."):
-                    dm_reply = generate_dm_response(state, chosen_action)
-                    apply_dm_response(state, dm_reply, chosen_action)
+        # ── TAB 3: TELEMETRY & VITALS (Pandas + Line Chart) ──
+        with tab_telemetry:
+            st.markdown("##### 📈 Journey Analytics & Quantitative Telemetry")
+            render_telemetry_analytics(state)
 
-                    # Check for game over or chapter transition
-                    if state.health <= 0 or state.sanity <= 0 or state.story_beat >= 50:
-                        st.session_state.game_phase = "game_over"
-                    st.rerun()
+        # ── TAB 4: CARTOGRAPHY & NPC CODEX (st.map) ──
+        with tab_world:
+            st.markdown(f"##### 🗺️ Cartography of {state.world_name}")
+            render_world_map_cartography(state)
+            st.divider()
+            st.markdown("##### 👥 Discovered NPC Ledger")
+            render_npc_ledger(state)
 
     # ── Right Column: Story History ──
     with col_hist:
@@ -388,7 +455,12 @@ elif st.session_state.game_phase == "game_over":
         
         render_game_over(ending)
 
-        c_restart, c_export = st.columns(2)
+        st.divider()
+        st.markdown("##### 📊 Final Journey Telemetry")
+        render_telemetry_analytics(state)
+
+        st.write("")
+        c_restart, c_export, c_csv = st.columns(3)
         with c_restart:
             if st.button("🔄 Start New Chronicle", use_container_width=True, type="primary"):
                 reset_to_setup()
@@ -396,9 +468,18 @@ elif st.session_state.game_phase == "game_over":
         with c_export:
             story_text = export_story_as_text(state)
             st.download_button(
-                label="💾 Download Final Chronicle",
+                label="📜 Download Final Chronicle (.txt)",
                 data=story_text,
                 file_name=f"chronicle_final_{state.protagonist_name}_{state.session_id[:6]}.txt",
                 mime="text/plain",
+                use_container_width=True,
+            )
+        with c_csv:
+            telemetry_csv = export_telemetry_csv(state)
+            st.download_button(
+                label="📊 Download Telemetry (.csv)",
+                data=telemetry_csv,
+                file_name=f"telemetry_final_{state.protagonist_name}_{state.session_id[:6]}.csv",
+                mime="text/csv",
                 use_container_width=True,
             )
