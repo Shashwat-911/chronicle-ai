@@ -2,17 +2,29 @@
 components.py — Reusable UI components for ChronicleAI.
 
 Provides rendering functions for every visual element of the
-visual novel interface: headers, stat bars, story panels,
-inventory, quest logs, chapter transitions, and game over screens.
+visual novel interface: headers, stat bars, dynamic KPI metric cards with deltas,
+interactive inventory editor with st.data_editor, telemetry analytics with st.line_chart,
+world cartography with st.map, story panels, inventory, quest logs,
+chapter transitions, and game over screens.
 """
 
 from __future__ import annotations
 
 import re
-
+from typing import Any
+import pandas as pd
 import streamlit as st
 
-from core.story_engine import strip_tags
+from core.story_engine import (
+    StoryState,
+    strip_tags,
+    get_turn_history_df,
+    get_inventory_dataframe,
+    update_inventory_from_dataframe,
+    get_npc_dataframe,
+    get_world_locations_df,
+    export_telemetry_csv,
+)
 
 
 # ── Header ───────────────────────────────────────────────────────────
@@ -41,6 +53,52 @@ def render_header(compact: bool = False) -> None:
             '</div>'
             '</div>',
             unsafe_allow_html=True,
+        )
+
+
+# ── Dynamic KPI Cards (st.metric with deltas) ─────────────────────────
+
+
+def render_kpi_dashboard(stats: dict[str, Any], health: int, sanity: int) -> None:
+    """Render dynamic KPI metric cards featuring deltas.
+
+    Args:
+        stats: Computed story stats dictionary.
+        health: Current health (0-100).
+        sanity: Current sanity (0-100).
+    """
+    c1, c2, c3, c4 = st.columns(4)
+
+    health_delta = stats.get("last_health_delta", 0)
+    sanity_delta = stats.get("last_sanity_delta", 0)
+    turn_num = stats.get("total_turns", 0)
+    quests_ratio = stats.get("quests_ratio", "0/0")
+
+    with c1:
+        st.metric(
+            label="💀 Vitality",
+            value=f"{health}/100",
+            delta=f"{health_delta:+d} HP" if health_delta != 0 else "Stable",
+            delta_color="normal",
+        )
+    with c2:
+        st.metric(
+            label="🌙 Sanity",
+            value=f"{sanity}/100",
+            delta=f"{sanity_delta:+d} Mind" if sanity_delta != 0 else "Grounded",
+            delta_color="normal",
+        )
+    with c3:
+        st.metric(
+            label="⏳ Turn Progress",
+            value=f"Turn {turn_num}",
+            delta="+1 Turn" if turn_num > 0 else "Arrival",
+        )
+    with c4:
+        st.metric(
+            label="📜 Active Quests",
+            value=quests_ratio,
+            delta=f"Chapter {stats.get('chapter', 1)}",
         )
 
 
@@ -118,7 +176,7 @@ def render_story_panel(text: str, is_new: bool = False) -> None:
     )
 
 
-# ── Inventory ────────────────────────────────────────────────────────
+# ── Inventory Badges ─────────────────────────────────────────────────
 
 
 def render_inventory(items: list[str]) -> None:
@@ -128,7 +186,7 @@ def render_inventory(items: list[str]) -> None:
         items: List of inventory item names.
     """
     st.markdown(
-        '<div class="inventory-title">🎒 Inventory</div>',
+        '<div class="inventory-title">🎒 Inventory Pack</div>',
         unsafe_allow_html=True,
     )
 
@@ -148,6 +206,122 @@ def render_inventory(items: list[str]) -> None:
         f'<div class="inventory-container">{badges}</div>',
         unsafe_allow_html=True,
     )
+
+
+# ── Interactive Inventory Codex (st.data_editor) ─────────────────────
+
+
+def render_interactive_inventory_editor(state: StoryState) -> None:
+    """Render an interactive data editor for player equipment and notes."""
+    df = get_inventory_dataframe(state)
+
+    st.caption("✍️ Edit equipment notes, toggle equipped status, or update item condition below:")
+    edited_df = st.data_editor(
+        df,
+        column_config={
+            "Equipped": st.column_config.CheckboxColumn(
+                "Equipped?",
+                help="Check if this item is currently active or worn",
+                default=False,
+            ),
+            "Category": st.column_config.SelectboxColumn(
+                "Category",
+                options=["Weapon", "Armor", "Consumable", "Artifact", "Quest Item", "Utility"],
+                required=True,
+            ),
+            "Condition": st.column_config.SelectboxColumn(
+                "Condition",
+                options=["Pristine", "Good", "Worn", "Damaged", "Discovered"],
+                required=True,
+            ),
+            "Player Notes": st.column_config.TextColumn(
+                "Player Lore & Notes",
+                width="medium",
+                help="Your personal notes about this item",
+            ),
+        },
+        disabled=["Item Name"],
+        use_container_width=True,
+        key="inventory_data_editor",
+    )
+
+    # Sync edits back to StoryState
+    update_inventory_from_dataframe(state, edited_df)
+
+
+# ── Telemetry & Analytics Dashboard (st.line_chart + Pandas) ─────────
+
+
+def render_telemetry_analytics(state: StoryState) -> None:
+    """Render comprehensive telemetry analytics and time-series line chart."""
+    df = get_turn_history_df(state)
+
+    if len(df) > 1:
+        st.markdown("###### 📈 Vitality & Sanity Telemetry Trend")
+        # Multi-line chart
+        chart_data = df.set_index("Turn")[["Vitality", "Sanity"]]
+        st.line_chart(chart_data, color=["#c93a3a", "#7c5ac9"])
+    else:
+        st.info("📊 Telemetry charts will plot your vital trends as you take more actions.")
+
+    st.markdown("###### 📋 Turn-by-Turn Journey Telemetry (Pandas Data Pipeline)")
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    csv_data = export_telemetry_csv(state)
+    st.download_button(
+        label="📥 Download Telemetry CSV Dataset",
+        data=csv_data,
+        file_name=f"chronicle_telemetry_{state.protagonist_name}_{state.session_id[:6]}.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+
+# ── Interactive World Cartography (st.map) ───────────────────────────
+
+
+def render_world_map_cartography(state: StoryState) -> None:
+    """Render interactive geographical map and landmark discovery registry."""
+    map_df = get_world_locations_df(state)
+    st.caption(f"🗺️ Discovered Landmark Coordinates in **{state.world_name}**:")
+    
+    st.map(
+        map_df,
+        latitude="lat",
+        longitude="lon",
+        size=25,
+        color="#c9a84c",
+        use_container_width=True,
+    )
+
+    # Landmark nodes registry
+    cols = st.columns(len(map_df))
+    for idx, row in map_df.iterrows():
+        col_target = cols[idx % len(cols)]
+        with col_target:
+            status_emoji = "📍" if row['status'] == 'Current' else ("🏰" if row['status'] == 'Visited' else "⚔")
+            st.metric(
+                label=f"{status_emoji} {row['location']}",
+                value=row['status'],
+                delta=f"Danger: {row['danger']}",
+                delta_color="off",
+            )
+
+
+# ── NPC Relations Ledger ─────────────────────────────────────────────
+
+
+def render_npc_ledger(state: StoryState) -> None:
+    """Render discovered NPC registry in a structured table."""
+    npc_df = get_npc_dataframe(state)
+    if npc_df.empty:
+        st.caption("No notable NPCs recorded in your codex yet.")
+    else:
+        st.dataframe(npc_df, use_container_width=True, hide_index=True)
 
 
 # ── Quest Log ────────────────────────────────────────────────────────
